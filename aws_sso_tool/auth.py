@@ -1,7 +1,9 @@
 import subprocess
 import time
-import boto3  # הוספת ייבוא של boto3
+import boto3
 import click
+from pathlib import Path  # הוספת ייבוא של Path
+import json
 from botocore.exceptions import NoCredentialsError, ClientError
 
 # הסף שבו נחדש את ה-token (10 דקות לפני שפג תוקף)
