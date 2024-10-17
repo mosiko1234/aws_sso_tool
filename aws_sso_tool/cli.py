@@ -15,7 +15,6 @@ from .utils import choose_region, get_default_profile, get_default_region
 @click.option('--stop-instance', type=str, help='Stop an EC2 instance (provide instance_id).')
 def main(set_default, set_region, list_buckets, upload_file, download_file, list_instances, start_instance, stop_instance):
     """ Main function for CLI tool. """
-    # עבודה עם פרופיל ברירת מחדל
     default_profile = get_default_profile()
 
     if default_profile:
@@ -25,12 +24,10 @@ def main(set_default, set_region, list_buckets, upload_file, download_file, list
         configure_sso()
         profile = get_default_profile()
 
-    # עבודה עם region
     region = get_default_region()
     if not region or set_region:
         region = choose_region()
 
-    # ביצוע פעולות S3 ו-EC2
     if list_buckets:
         list_buckets(profile, region)
     elif upload_file:
