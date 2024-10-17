@@ -1,6 +1,7 @@
 import subprocess
 import time
 import boto3
+import click  
 from botocore.exceptions import ClientError, NoCredentialsError
 
 TOKEN_EXPIRATION_THRESHOLD = 60 * 60 * 12  # 12 שעות (בזמן שניות)
@@ -49,11 +50,7 @@ def configure_sso():
     """
     click.echo("Starting AWS SSO configuration...")
     command = ["aws", "configure", "sso"]
-    output = run_aws_command(command)
-    if output:
-        click.echo(output)
-    else:
-        click.echo("SSO configuration failed.")
+    subprocess.run(command, check=True)
 
 def verify_identity(profile, region):
     """
