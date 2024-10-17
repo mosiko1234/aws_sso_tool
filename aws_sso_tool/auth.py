@@ -4,18 +4,23 @@ import boto3
 import click  
 from botocore.exceptions import ClientError, NoCredentialsError
 
-TOKEN_EXPIRATION_THRESHOLD = 60 * 60 * 12  # 12 שעות (בזמן שניות)
+TOKEN_EXPIRATION_THRESHOLD = 60 * 10
 
 def is_sso_token_valid(profile):
     """
-    בודק אם ה-Token של AWS SSO בתוקף.
+    בודק אם ה-Token של AWS SSO עדיין בתוקף עבור פרופיל מסוים.
+    מחזיר True אם ה-Token תקף, False אם יש לחדש אותו.
     """
     try:
+        # יוצרים session עם הפרופיל המוגדר
         session = boto3.Session(profile_name=profile)
         credentials = session.get_credentials()
 
-        expiration_time = credentials._expiry_time.timestamp()  # זמן תוקף ה-token
+        # בודקים אם קיימת תוקף של ה-token
+        expiration_time = credentials._expiry_time.timestamp()  # תוקף ה-token
         current_time = time.time()  # הזמן הנוכחי
+
+        # אם התוקף קרוב לפוג לפי הסף שהגדרנו, נחזיר False
         return (expiration_time - current_time) > TOKEN_EXPIRATION_THRESHOLD
     except AttributeError:
         return False  # אם אין token זמין, חובה להתחבר מחדש
@@ -37,7 +42,7 @@ def renew_sso_token(profile):
 
 def ensure_sso_token(profile):
     """
-    בודקת אם ה-token בתוקף ומחדשת אותו במידת הצורך.
+    פונקציה לבדיקת תוקף ה-token ולחידוש במידת הצורך לפני הפעלת כל פקודה.
     """
     if not is_sso_token_valid(profile):
         renew_sso_token(profile)
