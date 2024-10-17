@@ -2,7 +2,7 @@ import subprocess
 import time
 import boto3
 import click
-from pathlib import Path  # הוספת ייבוא של Path
+from pathlib import Path
 import json
 from botocore.exceptions import NoCredentialsError, ClientError
 
@@ -14,15 +14,17 @@ def get_sso_token_expiration(profile):
     מחפש את קובץ ה-SSO cache כדי לבדוק את תוקף ה-token עבור פרופיל מסוים.
     """
     sso_cache_dir = Path.home() / ".aws" / "sso" / "cache"
-    
+
     if not sso_cache_dir.exists():
         return None
 
+    # חיפוש קובצי cache עבור SSO, בדיקה אם יש token שתואם לפרופיל
     for cache_file in sso_cache_dir.glob("*.json"):
         with open(cache_file, 'r') as f:
             cache_data = json.load(f)
+            # חיפוש התאמה לפי פרופיל (startUrl)
             if cache_data.get("startUrl") and profile in cache_data.get("startUrl"):
-                return cache_data.get("expiresAt")
+                return cache_data.get("expiresAt")  # מחזירים את זמן תפוגת ה-token
     
     return None
 
@@ -35,9 +37,11 @@ def is_sso_token_valid(profile):
     if expiration_time_str is None:
         return False  # אין token, חייבים להתחבר מחדש
 
+    # המרת זמן התוקף למבנה timestamp
     expiration_time = time.mktime(time.strptime(expiration_time_str, "%Y-%m-%dT%H:%M:%SZ"))
     current_time = time.time()
 
+    # אם התוקף עומד לפוג (קרוב לתאריך התפוגה), נבצע חידוש
     return (expiration_time - current_time) > TOKEN_EXPIRATION_THRESHOLD
 
 def renew_sso_token(profile):
@@ -46,6 +50,7 @@ def renew_sso_token(profile):
     """
     try:
         print(f"SSO token expired or invalid. Renewing token for profile: {profile}...")
+        # הפעלה של aws sso login כדי לחדש את החיבור
         subprocess.run(["aws", "sso", "login", "--profile", profile], check=True)
         print("SSO token renewed successfully.")
     except subprocess.CalledProcessError as e:
