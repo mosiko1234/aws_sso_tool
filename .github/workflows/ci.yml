@@ -2,9 +2,7 @@ name: Publish Python Package
 
 on:
   push:
-    branches: [ "main" ]
-    tags:         # פעולה תתרחש כאשר תג דחוס ל-main
-      - 'v*.*.*'  # רק תגיות גרסה בפורמט vX.X.X יפעילו את העלאת החבילה ל-PyPI
+    branches: [ "main" ]  # תהליך יופעל עבור כל דחיפה ל-main
   pull_request:
     branches: [ "main" ]
 
@@ -35,7 +33,6 @@ jobs:
         run: python setup.py sdist bdist_wheel
 
       - name: Publish to PyPI
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') # העלאה רק עבור דחיפה של תג
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}  # שם המשתמש של PyPI שיוגדר בסודות של GitHub
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}  # סיסמת PyPI שיוגדר בסודות של GitHub
