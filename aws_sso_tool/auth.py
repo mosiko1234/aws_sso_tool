@@ -4,9 +4,23 @@ import json
 import time
 import click
 from pathlib import Path
-
+from botocore.exceptions import NoCredentialsError, ClientError
 # הסף שבו נחדש את ה-token (10 דקות לפני שפג תוקף)
 TOKEN_EXPIRATION_THRESHOLD = 60 * 10  # 10 דקות (בשניות)
+
+def verify_identity(profile, region):
+    """
+    Verify AWS identity using sts get-caller-identity.
+    """
+    try:
+        session = boto3.Session(profile_name=profile, region_name=region)
+        sts_client = session.client('sts')
+        identity = sts_client.get_caller_identity()
+        click.echo(f"Successfully connected to AWS as: {identity['Arn']}")
+    except NoCredentialsError:
+        click.echo("Error: AWS credentials not found.")
+    except ClientError as e:
+        click.echo(f"Error in connecting: {e}")
 
 def get_sso_token_expiration(profile):
     """
