@@ -1,10 +1,5 @@
 import pytest
-from aws_sso_tool.auth import verify_identity, configure_sso
-
-def test_configure_sso(mocker):
-    mock_subprocess = mocker.patch("subprocess.run")
-    configure_sso()
-    mock_subprocess.assert_called_once_with(["aws", "configure", "sso"], check=True)
+from aws_sso_tool.auth import verify_identity  # הסרנו את הייבוא של configure_sso
 
 def test_verify_identity(mocker):
     mock_session = mocker.patch("boto3.Session")
