@@ -1,5 +1,5 @@
 import click
-from .auth import verify_identity, configure_sso, ensure_sso_token
+from .auth import verify_identity, ensure_sso_token
 from .s3_operations import list_buckets, upload_file, download_file
 from .ec2_operations import list_instances, start_instance, stop_instance
 from .utils import choose_region, get_default_profile, get_default_region
