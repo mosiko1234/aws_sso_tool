@@ -8,6 +8,14 @@ from botocore.exceptions import NoCredentialsError, ClientError
 # הסף שבו נחדש את ה-token (10 דקות לפני שפג תוקף)
 TOKEN_EXPIRATION_THRESHOLD = 60 * 10  # 10 דקות (בשניות)
 
+def configure_sso():
+    """
+    פונקציה שמפעילה את `aws configure sso` לצורך הגדרת SSO ראשונית.
+    """
+    click.echo("Starting AWS SSO configuration...")
+    command = ["aws", "configure", "sso"]
+    subprocess.run(command, check=True)
+
 def verify_identity(profile, region):
     """
     Verify AWS identity using sts get-caller-identity.
