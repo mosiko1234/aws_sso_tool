@@ -1,52 +1,25 @@
 import subprocess
-import os
-import json
 import time
+import boto3  # הוספת ייבוא של boto3
 import click
-from pathlib import Path
 from botocore.exceptions import NoCredentialsError, ClientError
+
 # הסף שבו נחדש את ה-token (10 דקות לפני שפג תוקף)
 TOKEN_EXPIRATION_THRESHOLD = 60 * 10  # 10 דקות (בשניות)
-
-def configure_sso():
-    """
-    פונקציה שמפעילה את `aws configure sso` לצורך הגדרת SSO ראשונית.
-    """
-    click.echo("Starting AWS SSO configuration...")
-    command = ["aws", "configure", "sso"]
-    subprocess.run(command, check=True)
-
-def verify_identity(profile, region):
-    """
-    Verify AWS identity using sts get-caller-identity.
-    """
-    try:
-        session = boto3.Session(profile_name=profile, region_name=region)
-        sts_client = session.client('sts')
-        identity = sts_client.get_caller_identity()
-        click.echo(f"Successfully connected to AWS as: {identity['Arn']}")
-    except NoCredentialsError:
-        click.echo("Error: AWS credentials not found.")
-    except ClientError as e:
-        click.echo(f"Error in connecting: {e}")
 
 def get_sso_token_expiration(profile):
     """
     מחפש את קובץ ה-SSO cache כדי לבדוק את תוקף ה-token עבור פרופיל מסוים.
     """
-    # מסלול תיקיית cache של SSO (תלוי במערכת ההפעלה)
     sso_cache_dir = Path.home() / ".aws" / "sso" / "cache"
     
-    # אם התיקיה לא קיימת, נצטרך להתחבר מחדש
     if not sso_cache_dir.exists():
         return None
 
-    # חיפוש קבצי cache לפי פרופיל
     for cache_file in sso_cache_dir.glob("*.json"):
         with open(cache_file, 'r') as f:
             cache_data = json.load(f)
             if cache_data.get("startUrl") and profile in cache_data.get("startUrl"):
-                # מחזיר את זמן התוקף של ה-token
                 return cache_data.get("expiresAt")
     
     return None
@@ -60,11 +33,9 @@ def is_sso_token_valid(profile):
     if expiration_time_str is None:
         return False  # אין token, חייבים להתחבר מחדש
 
-    # המרת זמן התוקף למבנה timestamp
     expiration_time = time.mktime(time.strptime(expiration_time_str, "%Y-%m-%dT%H:%M:%SZ"))
     current_time = time.time()
 
-    # בדיקה אם התוקף עומד לפוג
     return (expiration_time - current_time) > TOKEN_EXPIRATION_THRESHOLD
 
 def renew_sso_token(profile):
@@ -87,3 +58,17 @@ def ensure_sso_token(profile):
         renew_sso_token(profile)
     else:
         print("SSO token is still valid.")
+
+def verify_identity(profile, region):
+    """
+    Verify AWS identity using sts get-caller-identity.
+    """
+    try:
+        session = boto3.Session(profile_name=profile, region_name=region)
+        sts_client = session.client('sts')
+        identity = sts_client.get_caller_identity()
+        click.echo(f"Successfully connected to AWS as: {identity['Arn']}")
+    except NoCredentialsError:
+        click.echo("Error: AWS credentials not found.")
+    except ClientError as e:
+        click.echo(f"Error in connecting: {e}")
