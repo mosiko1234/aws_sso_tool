@@ -1,5 +1,5 @@
 import click
-from .auth import verify_identity, configure_sso
+from .auth import verify_identity, configure_sso, ensure_sso_token
 from .s3_operations import list_buckets, upload_file, download_file
 from .ec2_operations import list_instances, start_instance, stop_instance
 from .utils import choose_region, get_default_profile, get_default_region
@@ -15,15 +15,12 @@ from .utils import choose_region, get_default_profile, get_default_region
 @click.option('--stop-instance', type=str, help='Stop an EC2 instance (provide instance_id).')
 def main(set_default, set_region, list_buckets, upload_file, download_file, list_instances, start_instance, stop_instance):
     """ Main function for CLI tool. """
-    default_profile = get_default_profile()
+    profile = get_default_profile()
 
-    if default_profile:
-        profile = default_profile
-        click.echo(f"Using default profile: {profile}")
-    else:
-        configure_sso()
-        profile = get_default_profile()
+    # בדוק את ה-SSO Token וחדש אותו במידת הצורך
+    ensure_sso_token(profile)
 
+    # כעת המשך לשאר הפקודות
     region = get_default_region()
     if not region or set_region:
         region = choose_region()
