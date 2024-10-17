@@ -95,7 +95,7 @@ def choose_region():
     return chosen_region
 
 # S3 operations
-def list_buckets(profile, region):
+def list_s3_buckets(profile, region):
     try:
         session = boto3.Session(profile_name=profile, region_name=region)
         s3_client = session.client('s3')
@@ -163,13 +163,13 @@ def stop_instance(profile, instance_id, region):
 @click.command()
 @click.option('--set-default', is_flag=True, help='Set a default AWS profile.')
 @click.option('--set-region', is_flag=True, help='Set a default AWS region.')
-@click.option('--list-buckets', is_flag=True, help='List S3 buckets.')
+@click.option('--list-buckets', 'list_buckets_option', is_flag=True, help='List S3 buckets.')  # תיקון כאן
 @click.option('--upload-file', type=(str, str), help='Upload file to S3 (provide file_path and bucket_name).')
 @click.option('--download-file', type=(str, str, str), help='Download file from S3 (provide bucket_name, object_name, file_path).')
 @click.option('--list-instances', is_flag=True, help='List EC2 instances.')
 @click.option('--start-instance', type=str, help='Start an EC2 instance (provide instance_id).')
 @click.option('--stop-instance', type=str, help='Stop an EC2 instance (provide instance_id).')
-def main(set_default, set_region, list_buckets, upload_file, download_file, list_instances, start_instance, stop_instance):
+def main(set_default, set_region, list_buckets_option, upload_file, download_file, list_instances, start_instance, stop_instance):  # תיקון כאן
     profiles = get_profiles()
 
     if not profiles:
@@ -210,8 +210,8 @@ def main(set_default, set_region, list_buckets, upload_file, download_file, list
     if not region:
         region = choose_region()
 
-    if list_buckets:
-        list_buckets(profile, region)
+    if list_buckets_option:  # שינוי כאן
+        list_s3_buckets(profile, region)
         return
     if upload_file:
         file_path, bucket_name = upload_file
