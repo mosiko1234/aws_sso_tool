@@ -5,12 +5,12 @@ with open('README.md', 'r', encoding='utf-8') as fh:
 
 setup(
     name='aws_sso_tool',
-    version='0.1.8',
+    version='0.1.1',
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        'boto3>=1.18.0',  # כדאי לציין גרסה מינימלית של boto3 אם צריך
-        'click>=7.0',  # כדאי לציין גרסה מינימלית של click אם יש דרישה
+        'boto3>=1.18.0',
+        'click>=7.0',
     ],
     entry_points={
         'console_scripts': [
@@ -18,7 +18,7 @@ setup(
         ],
     },
     author="Moshe Eliya",
-    author_email="mosiko1234@gmail.com",  # מומלץ להוסיף כתובת אימייל
+    author_email="mosiko1234@gmail.com",
     description="CLI tool to simplify AWS SSO login and operations",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -27,8 +27,8 @@ setup(
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-        "Development Status :: 3 - Alpha",  # אפשר להוסיף שלב הפיתוח
-        "Intended Audience :: Developers",  # הוספת קהל יעד
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Developers",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
     python_requires='>=3.6',
